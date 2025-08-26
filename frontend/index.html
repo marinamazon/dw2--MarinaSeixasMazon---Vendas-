@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja Escolar</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">Loja Escolar</h1>
+            <button 
+                class="cart-button" 
+                aria-label="Abrir carrinho de compras"
+                aria-expanded="false"
+                aria-controls="cart-drawer">
+                <span class="cart-icon">🛒</span>
+                <span class="cart-count" aria-live="polite">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <section class="products" aria-label="Lista de produtos">
+                <div class="products-header">
+                    <div class="search-container">
+                        <input 
+                            type="search" 
+                            id="product-search" 
+                            placeholder="Buscar produtos..."
+                            aria-label="Buscar produtos">
+                    </div>
+                    <div class="sort-container">
+                        <label for="sort-select">Ordenar por:</label>
+                        <select id="sort-select" aria-label="Ordenar produtos">
+                            <option value="name-asc">Nome (A-Z)</option>
+                            <option value="name-desc">Nome (Z-A)</option>
+                            <option value="price-asc">Menor preço</option>
+                            <option value="price-desc">Maior preço</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="products-grid" id="products-grid">
+                    <!-- Produtos serão inseridos aqui via JavaScript -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Cart Drawer -->
+    <div 
+        class="cart-drawer" 
+        id="cart-drawer" 
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Carrinho de compras">
+        <div class="cart-header">
+            <h2>Seu Carrinho</h2>
+            <button 
+                class="close-cart"
+                aria-label="Fechar carrinho">
+                ✕
+            </button>
+        </div>
+        <div class="cart-items">
+            <!-- Items do carrinho serão inseridos aqui via JavaScript -->
+        </div>
+        <div class="cart-footer">
+            <div class="coupon-container">
+                <input 
+                    type="text" 
+                    id="coupon-input" 
+                    placeholder="Código do cupom"
+                    aria-label="Inserir código do cupom">
+                <button 
+                    id="apply-coupon"
+                    aria-label="Aplicar cupom">
+                    Aplicar
+                </button>
+            </div>
+            <div class="cart-total">
+                <span>Total:</span>
+                <span class="total-amount">R$ 0,00</span>
+            </div>
+            <button 
+                class="checkout-button"
+                aria-label="Finalizar pedido">
+                Finalizar Pedido
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div 
+        class="modal" 
+        id="admin-modal" 
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title">
+        <div class="modal-content">
+            <h2 id="modal-title">Gerenciar Produto</h2>
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="product-name">Nome*</label>
+                    <input 
+                        type="text" 
+                        id="product-name" 
+                        required 
+                        minlength="3" 
+                        maxlength="60">
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Descrição</label>
+                    <textarea 
+                        id="product-description" 
+                        rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="product-price">Preço*</label>
+                    <input 
+                        type="number" 
+                        id="product-price" 
+                        required 
+                        min="0.01" 
+                        step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="product-stock">Estoque*</label>
+                    <input 
+                        type="number" 
+                        id="product-stock" 
+                        required 
+                        min="0">
+                </div>
+                <div class="form-group">
+                    <label for="product-category">Categoria*</label>
+                    <select id="product-category" required>
+                        <option value="">Selecione...</option>
+                        <option value="papelaria">Papelaria</option>
+                        <option value="escritorio">Escritório</option>
+                        <option value="arte">Arte</option>
+                        <option value="escolar">Material Escolar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="product-sku">SKU</label>
+                    <input type="text" id="product-sku">
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Salvar</button>
+                    <button type="button" class="cancel-button">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+    
+    <script src="scripts.js"></script>
+</body>
+</html>
