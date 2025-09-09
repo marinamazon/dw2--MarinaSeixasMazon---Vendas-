@@ -166,6 +166,11 @@ produtos = [
     }
 ]
 
+# Adiciona campo `imagem` usando picsum.photos para cada produto (seed a partir do nome)
+for p in produtos:
+    seed = ''.join(ch for ch in p['nome'] if ch.isalnum())[:30]
+    p['imagem'] = f"https://picsum.photos/seed/{seed}/400/300"
+
 def seed_db():
     db = SessionLocal()
     try:
