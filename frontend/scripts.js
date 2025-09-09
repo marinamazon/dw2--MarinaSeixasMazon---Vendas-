@@ -7,6 +7,15 @@ const DISCOUNT_PERCENT = 0.1;
 // Estado global da aplicação
 let products = [];
 let cart = loadCart();
+// Kit de materiais escolares (estático)
+const kitItems = [
+    { id: 'kit-01', nome: 'Lápis grafite 2B (6un)', preco: 9.90, quantidade: 1, imagem: 'https://i.imgur.com/3G7Qx6Y.jpg' },
+    { id: 'kit-02', nome: 'Caneta esferográfica azul (2un)', preco: 6.00, quantidade: 1, imagem: 'https://i.imgur.com/kKQp0kD.jpg' },
+    { id: 'kit-03', nome: 'Borracha branca', preco: 1.50, quantidade: 1, imagem: 'https://i.imgur.com/5bXkY9s.jpg' },
+    { id: 'kit-04', nome: 'Apontador com depósito', preco: 7.90, quantidade: 1, imagem: 'https://i.imgur.com/2uH1ZtA.jpg' },
+    { id: 'kit-05', nome: 'Caderno universitário 10 matérias', preco: 24.90, quantidade: 1, imagem: 'https://i.imgur.com/8Qz7Z4r.jpg' },
+    { id: 'kit-06', nome: 'Estojo com zíper', preco: 19.90, quantidade: 1, imagem: 'https://i.imgur.com/YeH4K7f.jpg' }
+];
 
 // Elementos DOM
 const productsGrid = document.getElementById('products-grid');
@@ -39,12 +48,41 @@ async function initialize() {
     try {
         await fetchProducts();
         renderProducts();
+        renderKit();
         updateCartUI();
         loadSortPreference();
     } catch (error) {
         showToast('Erro ao carregar produtos');
         console.error('Initialization error:', error);
     }
+}
+
+function renderKit() {
+    const kitGrid = document.getElementById('kit-grid');
+    kitGrid.innerHTML = kitItems.map(item => `
+        <div class="kit-item" data-id="${item.id}">
+            <img src="${item.imagem}" alt="${item.nome}" class="kit-img" loading="lazy">
+            <h3>${item.nome}</h3>
+            <p>R$ ${item.preco.toFixed(2)}</p>
+            <button class="kit-add" onclick="addKitToCart('${item.id}')">Adicionar ao carrinho</button>
+        </div>
+    `).join('');
+}
+
+function addKitToCart(kitId) {
+    const kit = kitItems.find(k => k.id === kitId);
+    if (!kit) return;
+
+    // Produtos remotos têm ids numéricos; itens de kit são locais — criamos id temporário
+    const existing = cart.items.find(i => i.id === kit.id);
+    if (existing) {
+        existing.quantidade += 1;
+    } else {
+        cart.items.push({ id: kit.id, nome: kit.nome, preco: kit.preco, quantidade: 1 });
+    }
+    saveCart();
+    updateCartUI();
+    showToast(`${kit.nome} adicionado ao carrinho`);
 }
 
 // Funções de API

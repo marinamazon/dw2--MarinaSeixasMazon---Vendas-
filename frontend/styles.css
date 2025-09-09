@@ -144,6 +144,58 @@ body {
     gap: var(--spacing-lg);
 }
 
+/* Kit de Materiais */
+.kit-section {
+    margin-top: var(--spacing-xl);
+}
+
+.kit-desc {
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-md);
+}
+
+.kit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.kit-item {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid var(--gray-200);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+}
+
+.kit-item h3 {
+    margin-bottom: var(--spacing-xs);
+    font-size: 1rem;
+}
+
+.kit-item p {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-sm);
+}
+
+.kit-add {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    width: 100%;
+}
+
+.kit-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: var(--spacing-sm);
+}
+
 .product-card {
     background: white;
     border-radius: var(--border-radius-md);
