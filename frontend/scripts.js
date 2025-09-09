@@ -45,15 +45,18 @@ productForm.addEventListener('submit', handleProductSubmit);
 
 // Funções de Inicialização
 async function initialize() {
+    // Primeiro renderizamos itens estáticos (kit) para que apareçam mesmo sem backend
+    renderKit();
     try {
         await fetchProducts();
         renderProducts();
-        renderKit();
+    } catch (error) {
+        // Se o backend não estiver disponível, mostramos um toast mas mantemos o kit visível
+        showToast('Aviso: backend indisponível. Alguns produtos podem não aparecer.');
+        console.error('Initialization error:', error);
+    } finally {
         updateCartUI();
         loadSortPreference();
-    } catch (error) {
-        showToast('Erro ao carregar produtos');
-        console.error('Initialization error:', error);
     }
 }
 
@@ -144,7 +147,7 @@ function renderProducts(filteredProducts = products) {
     productsGrid.innerHTML = filteredProducts.map(product => `
         <article class="product-card" data-id="${product.id}">
             <img 
-                src="${product.imagem || 'placeholder.jpg'}" 
+                src="${product.imagem || 'https://via.placeholder.com/400x300?text=Sem+imagem'}" 
                 alt="${product.nome}"
                 class="product-image"
                 loading="lazy">
@@ -172,7 +175,7 @@ function renderCart() {
     cartItems.innerHTML = cart.items.map(item => `
         <div class="cart-item" data-id="${item.id}">
             <img 
-                src="${item.imagem || 'placeholder.jpg'}" 
+                src="${item.imagem || 'https://via.placeholder.com/60?text=?'}" 
                 alt="${item.nome}"
                 width="60"
                 height="60">
