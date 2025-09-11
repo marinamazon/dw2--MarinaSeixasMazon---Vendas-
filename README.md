@@ -1,6 +1,6 @@
-# Loja Escolar - Sistema de Vendas
+# Loja - Sistema de Vendas
 
-Sistema web de e-commerce para uma loja escolar, desenvolvido como projeto da disciplina DW2.
+Sistema web de e-commerce para uma loja, desenvolvido como projeto da disciplina DW2.
 
 ## Tecnologias Utilizadas
 

@@ -6,7 +6,7 @@ import schemas
 from typing import List, Optional
 from decimal import Decimal
 
-app = FastAPI(title="API Loja Escolar")
+app = FastAPI(title="API Loja")
 
 # Configuração CORS
 app.add_middleware(

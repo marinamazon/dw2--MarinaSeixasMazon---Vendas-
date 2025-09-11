@@ -7,15 +7,6 @@ const DISCOUNT_PERCENT = 0.1;
 // Estado global da aplicação
 let products = [];
 let cart = loadCart();
-// Kit de materiais escolares (estático)
-const kitItems = [
-    { id: 'kit-01', nome: 'Lápis grafite 2B (6un)', preco: 9.90, quantidade: 1, imagem: 'https://i.imgur.com/3G7Qx6Y.jpg' },
-    { id: 'kit-02', nome: 'Caneta esferográfica azul (2un)', preco: 6.00, quantidade: 1, imagem: 'https://i.imgur.com/kKQp0kD.jpg' },
-    { id: 'kit-03', nome: 'Borracha branca', preco: 1.50, quantidade: 1, imagem: 'https://i.imgur.com/5bXkY9s.jpg' },
-    { id: 'kit-04', nome: 'Apontador com depósito', preco: 7.90, quantidade: 1, imagem: 'https://i.imgur.com/2uH1ZtA.jpg' },
-    { id: 'kit-05', nome: 'Caderno universitário 10 matérias', preco: 24.90, quantidade: 1, imagem: 'https://i.imgur.com/8Qz7Z4r.jpg' },
-    { id: 'kit-06', nome: 'Estojo com zíper', preco: 19.90, quantidade: 1, imagem: 'https://i.imgur.com/YeH4K7f.jpg' }
-];
 
 // Elementos DOM
 const productsGrid = document.getElementById('products-grid');
@@ -43,10 +34,57 @@ applyCouponButton.addEventListener('click', applyCoupon);
 checkoutButton.addEventListener('click', handleCheckout);
 productForm.addEventListener('submit', handleProductSubmit);
 
+// Custom item modal elements & handlers
+const addCustomButton = document.getElementById('add-custom-button');
+const customModal = document.getElementById('custom-item-modal');
+const customForm = document.getElementById('custom-item-form');
+const closeCustomBtns = document.getElementsByClassName('close-custom');
+
+if (addCustomButton) addCustomButton.addEventListener('click', openCustomModal);
+if (customForm) customForm.addEventListener('submit', handleCustomSubmit);
+Array.from(closeCustomBtns).forEach(btn => btn.addEventListener('click', closeCustomModal));
+
+function openCustomModal() {
+    if (!customModal) return;
+    customModal.classList.add('open');
+    customModal.setAttribute('aria-hidden', 'false');
+    const nameEl = document.getElementById('custom-name');
+    if (nameEl) nameEl.focus();
+}
+
+function closeCustomModal() {
+    if (!customModal) return;
+    customModal.classList.remove('open');
+    customModal.setAttribute('aria-hidden', 'true');
+    if (customForm) customForm.reset();
+}
+
+function handleCustomSubmit(event) {
+    event.preventDefault();
+    const name = document.getElementById('custom-name').value.trim();
+    const price = parseFloat(document.getElementById('custom-price').value);
+    const quantity = parseInt(document.getElementById('custom-quantity').value, 10);
+    const category = document.getElementById('custom-category').value.trim() || 'personalizado';
+    const description = document.getElementById('custom-description').value.trim() || '';
+
+    if (!name || isNaN(price) || price <= 0 || isNaN(quantity) || quantity <= 0) {
+        showToast('Preencha nome, preço válido e quantidade válida');
+        return;
+    }
+
+    const id = `custom-${Date.now()}`;
+    const item = { id, nome: name, preco: price, quantidade: quantity, categoria: category, descricao: description };
+
+    cart.items.push(item);
+    saveCart();
+    updateCartUI();
+    closeCustomModal();
+    showToast(`${name} adicionado ao carrinho`);
+}
+
 // Funções de Inicialização
 async function initialize() {
-    // Primeiro renderizamos itens estáticos (kit) para que apareçam mesmo sem backend
-    renderKit();
+    // Itens do kit removidos conforme solicitação
     try {
         await fetchProducts();
         renderProducts();
@@ -60,33 +98,7 @@ async function initialize() {
     }
 }
 
-function renderKit() {
-    const kitGrid = document.getElementById('kit-grid');
-    kitGrid.innerHTML = kitItems.map(item => `
-        <div class="kit-item" data-id="${item.id}">
-            <img src="${item.imagem}" alt="${item.nome}" class="kit-img" loading="lazy">
-            <h3>${item.nome}</h3>
-            <p>R$ ${item.preco.toFixed(2)}</p>
-            <button class="kit-add" onclick="addKitToCart('${item.id}')">Adicionar ao carrinho</button>
-        </div>
-    `).join('');
-}
-
-function addKitToCart(kitId) {
-    const kit = kitItems.find(k => k.id === kitId);
-    if (!kit) return;
-
-    // Produtos remotos têm ids numéricos; itens de kit são locais — criamos id temporário
-    const existing = cart.items.find(i => i.id === kit.id);
-    if (existing) {
-        existing.quantidade += 1;
-    } else {
-        cart.items.push({ id: kit.id, nome: kit.nome, preco: kit.preco, quantidade: 1 });
-    }
-    saveCart();
-    updateCartUI();
-    showToast(`${kit.nome} adicionado ao carrinho`);
-}
+// Kit functions removed
 
 // Funções de API
 async function fetchProducts() {

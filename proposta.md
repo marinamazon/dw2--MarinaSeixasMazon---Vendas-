@@ -49,7 +49,7 @@ Identidade visual (cores e tipografia)
 • Texto principal: #0F172A
 • Fonte sugerida: “Inter” ou “Roboto” (fallback sans-serif)
 Layout
-• Header fixo com logo/título “Biblioteca Escolar” + barra de busca.
+• Header fixo com logo/título “Biblioteca” + barra de busca.
 • Sidebar à esquerda com filtros (Gênero, Ano, Status).
 • Área principal com:
 o Card list de livros (capa, título, autor, ano, status).
@@ -85,7 +85,7 @@ Identidade visual
 • Texto: #111827
 • Fonte sugerida: “Poppins” ou “Inter” (fallback sans-serif)
 Layout
-• Header com logomarca “Loja Escolar” + ícone do carrinho (badge de
+• Header com logomarca “Loja” + ícone do carrinho (badge de
 quantidade).
 • Grid responsivo de cards de produtos (imagem, nome, preço, estoque).
 • Drawer/Modal de carrinho (lista itens, subtotal, cupom).
@@ -118,7 +118,7 @@ Identidade visual
 • Texto: #0B1220
 • Fonte sugerida: “Roboto” ou “Inter” (sans-serif)
 Layout
-• Header com “Gestão Escolar” + busca por aluno.
+• Header com “Gestão” + busca por aluno.
 • Duas colunas: à esquerda filtro/estatísticas rápidas; à direita listagem
 principal.
 • Modais para Novo Aluno e Nova Matrícula.

@@ -2,7 +2,7 @@ from database import SessionLocal
 from models import Produto
 from decimal import Decimal
 
-# Dados de exemplo para a loja escolar
+# Dados de exemplo para a loja
 produtos = [
     {
         "nome": "Caderno Universitário 10 Matérias",
@@ -13,76 +13,12 @@ produtos = [
         "sku": "CAD-UNI-10M"
     },
     {
-        "nome": "Lápis Preto 2B",
-        "descricao": "Lápis para escrita geral, graduação 2B",
-        "preco": Decimal("1.50"),
-        "estoque": 100,
-        "categoria": "escolar",
-        "sku": "LAP-2B"
-    },
-    {
-        "nome": "Caneta Esferográfica Azul",
-        "descricao": "Caneta com ponta média 1.0mm",
-        "preco": Decimal("2.50"),
-        "estoque": 80,
-        "categoria": "escolar",
-        "sku": "CAN-ESF-AZ"
-    },
-    {
-        "nome": "Borracha Branca",
-        "descricao": "Borracha macia para apagar grafite",
-        "preco": Decimal("1.00"),
-        "estoque": 120,
-        "categoria": "escolar",
-        "sku": "BOR-BR"
-    },
-    {
-        "nome": "Apontador com Depósito",
-        "descricao": "Apontador de metal com depósito plástico",
-        "preco": Decimal("5.90"),
-        "estoque": 40,
-        "categoria": "escolar",
-        "sku": "APT-DEP"
-    },
-    {
         "nome": "Pasta Aba Elástico",
         "descricao": "Pasta plástica formato A4 com elástico",
         "preco": Decimal("7.50"),
         "estoque": 60,
         "categoria": "papelaria",
         "sku": "PAS-A4-EL"
-    },
-    {
-        "nome": "Tesoura Escolar",
-        "descricao": "Tesoura sem ponta, 13cm",
-        "preco": Decimal("8.90"),
-        "estoque": 30,
-        "categoria": "escolar",
-        "sku": "TES-13"
-    },
-    {
-        "nome": "Cola Branca 90g",
-        "descricao": "Cola líquida para papel e cartolina",
-        "preco": Decimal("4.90"),
-        "estoque": 45,
-        "categoria": "escolar",
-        "sku": "COL-90G"
-    },
-    {
-        "nome": "Régua 30cm",
-        "descricao": "Régua plástica transparente",
-        "preco": Decimal("3.50"),
-        "estoque": 70,
-        "categoria": "escolar",
-        "sku": "REG-30"
-    },
-    {
-        "nome": "Estojo Escolar",
-        "descricao": "Estojo com zíper e 2 divisórias",
-        "preco": Decimal("15.90"),
-        "estoque": 25,
-        "categoria": "escolar",
-        "sku": "EST-2DIV"
     },
     {
         "nome": "Papel Sulfite A4",
@@ -123,14 +59,6 @@ produtos = [
         "estoque": 40,
         "categoria": "arte",
         "sku": "GIZ-12"
-    },
-    {
-        "nome": "Mochila Escolar",
-        "descricao": "Mochila resistente com múltiplos compartimentos",
-        "preco": Decimal("89.90"),
-        "estoque": 15,
-        "categoria": "escolar",
-        "sku": "MOC-ESC"
     },
     {
         "nome": "Calculadora Simples",

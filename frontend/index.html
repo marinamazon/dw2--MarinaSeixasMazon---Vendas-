@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loja Escolar</title>
+    <title>Loja</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Google Fonts - Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -11,7 +11,8 @@
 <body>
     <header class="header">
         <div class="container">
-            <h1 class="logo">Loja Escolar</h1>
+            <h1 class="logo">Loja</h1>
+            <button id="add-custom-button" class="add-item-button" aria-label="Adicionar item personalizado">Adicionar Item</button>
             <button 
                 class="cart-button" 
                 aria-label="Abrir carrinho de compras"
@@ -49,13 +50,7 @@
                 </div>
             </section>
 
-            <section class="kit-section" id="kit-section" aria-label="Kit de materiais escolares">
-                <h2>Kit: Materiais Escolares</h2>
-                <p class="kit-desc">Kit sugerido com itens básicos para início de ano letivo — adicione ao carrinho os itens que desejar.</p>
-                <div class="kit-grid" id="kit-grid">
-                    <!-- Itens do kit serão inseridos aqui via JavaScript -->
-                </div>
-            </section>
+            <!-- Kit de materiais removido conforme solicitação -->
         </div>
     </main>
 
@@ -153,7 +148,6 @@
                         <option value="papelaria">Papelaria</option>
                         <option value="escritorio">Escritório</option>
                         <option value="arte">Arte</option>
-                        <option value="escolar">Material Escolar</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -163,6 +157,45 @@
                 <div class="form-actions">
                     <button type="submit">Salvar</button>
                     <button type="button" class="cancel-button">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Item Modal -->
+    <div 
+        class="modal" 
+        id="custom-item-modal" 
+        aria-hidden="true"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="custom-modal-title">
+        <div class="modal-content">
+            <h2 id="custom-modal-title">Adicionar Item Personalizado</h2>
+            <form id="custom-item-form">
+                <div class="form-group">
+                    <label for="custom-name">Nome*</label>
+                    <input type="text" id="custom-name" required minlength="1" maxlength="60">
+                </div>
+                <div class="form-group">
+                    <label for="custom-price">Preço*</label>
+                    <input type="number" id="custom-price" required min="0.01" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="custom-quantity">Quantidade*</label>
+                    <input type="number" id="custom-quantity" required min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="custom-category">Categoria</label>
+                    <input type="text" id="custom-category" maxlength="30">
+                </div>
+                <div class="form-group">
+                    <label for="custom-description">Descrição</label>
+                    <textarea id="custom-description" rows="3" maxlength="200"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Adicionar ao Carrinho</button>
+                    <button type="button" class="close-custom">Cancelar</button>
                 </div>
             </form>
         </div>
