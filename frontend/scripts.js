@@ -18,6 +18,7 @@ const totalAmount = document.querySelector('.total-amount');
 const checkoutButton = document.querySelector('.checkout-button');
 const productSearch = document.getElementById('product-search');
 const sortSelect = document.getElementById('sort-select');
+const categorySelect = document.getElementById('category-select');
 const couponInput = document.getElementById('coupon-input');
 const applyCouponButton = document.getElementById('apply-coupon');
 const adminModal = document.getElementById('admin-modal');
@@ -30,6 +31,7 @@ cartButton.addEventListener('click', toggleCart);
 document.querySelector('.close-cart').addEventListener('click', closeCart);
 productSearch.addEventListener('input', debounce(filterProducts, 300));
 sortSelect.addEventListener('change', handleSort);
+if (categorySelect) categorySelect.addEventListener('change', handleCategoryFilter);
 applyCouponButton.addEventListener('click', applyCoupon);
 checkoutButton.addEventListener('click', handleCheckout);
 productForm.addEventListener('submit', handleProductSubmit);
@@ -95,6 +97,11 @@ async function initialize() {
     } finally {
         updateCartUI();
         loadSortPreference();
+        // Load saved category filter
+        const savedCategory = localStorage.getItem('category-filter');
+        if (savedCategory && categorySelect) {
+            categorySelect.value = savedCategory;
+        }
     }
 }
 
@@ -156,6 +163,11 @@ async function deleteProduct(id) {
 
 // Funções de Renderização
 function renderProducts(filteredProducts = products) {
+    if (!filteredProducts || filteredProducts.length === 0) {
+        productsGrid.innerHTML = `<p class="empty-note">Nenhum produto disponível — verifique o backend ou adicione itens personalizados.</p>`;
+        return;
+    }
+
     productsGrid.innerHTML = filteredProducts.map(product => `
         <article class="product-card" data-id="${product.id}">
             <img 
@@ -321,11 +333,18 @@ function showToast(message, duration = 3000) {
 // Funções de Filtro e Ordenação
 function filterProducts() {
     const searchTerm = productSearch.value.toLowerCase();
-    const filtered = products.filter(product => 
-        product.nome.toLowerCase().includes(searchTerm) ||
-        product.descricao?.toLowerCase().includes(searchTerm)
-    );
+    const category = categorySelect ? categorySelect.value : '';
+    const filtered = products.filter(product => {
+        const matchesSearch = product.nome.toLowerCase().includes(searchTerm) || product.descricao?.toLowerCase().includes(searchTerm);
+        const matchesCategory = !category || product.categoria === category || (category === 'personalizado' && String(product.id).startsWith('custom-'));
+        return matchesSearch && matchesCategory;
+    });
     renderProducts(filtered);
+}
+
+function handleCategoryFilter() {
+    localStorage.setItem('category-filter', categorySelect.value);
+    filterProducts();
 }
 
 function handleSort() {
