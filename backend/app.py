@@ -1,10 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from models import Produto, PedidoCreate
+from models import Produto
 from database import SessionLocal, init_db
 import schemas
 from typing import List, Optional
 from decimal import Decimal
+from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+from fastapi import Body
 
 app = FastAPI(title="API Loja")
 
@@ -37,7 +41,7 @@ async def listar_produtos(
     search: Optional[str] = None,
     categoria: Optional[str] = None,
     sort: Optional[str] = None,
-    db: SessionLocal = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     """
     Lista todos os produtos com opções de filtro e ordenação.
@@ -71,7 +75,7 @@ async def listar_produtos(
 @app.post("/produtos", response_model=schemas.ProdutoResponse, status_code=201)
 async def criar_produto(
     produto: schemas.ProdutoCreate,
-    db: SessionLocal = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     """
     Cria um novo produto.
@@ -90,7 +94,7 @@ async def criar_produto(
 async def atualizar_produto(
     produto_id: int,
     produto: schemas.ProdutoUpdate,
-    db: SessionLocal = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     """
     Atualiza um produto existente.
@@ -113,7 +117,7 @@ async def atualizar_produto(
 @app.delete("/produtos/{produto_id}")
 async def deletar_produto(
     produto_id: int,
-    db: SessionLocal = Depends(get_db)
+    db: Session = Depends(get_db)
 ):
     """
     Remove um produto.
@@ -128,38 +132,41 @@ async def deletar_produto(
 
 @app.post("/carrinho/confirmar")
 async def confirmar_pedido(
-    pedido: PedidoCreate,
-    db: SessionLocal = Depends(get_db)
+    pedido: dict = Body(...),
+    db: Session = Depends(get_db)
 ):
     """
     Confirma um pedido, aplicando desconto se houver cupom válido e atualizando estoque.
     """
-    # Valida itens e estoque
+    # Valida itens e estoque; aceita itens personalizados (sem produto_id)
     total = Decimal('0.00')
-    for item in pedido.items:
-        produto = db.query(Produto).filter(Produto.id == item.produto_id).first()
-        if not produto:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Produto {item.produto_id} não encontrado"
-            )
-        
-        if produto.estoque < item.quantidade:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Estoque insuficiente para {produto.nome}"
-            )
-        
-        total += produto.preco * item.quantidade
+    items = pedido.get('items', []) if isinstance(pedido, dict) else []
+    product_updates = []  # tuples (produto, quantidade) para decrementar estoque depois
+    for item in items:
+        # Caso item venha referenciando um produto existente
+        if isinstance(item, dict) and 'produto_id' in item:
+            pid = item.get('produto_id')
+            quantidade = int(item.get('quantidade', 0))
+            produto = db.query(Produto).filter(Produto.id == pid).first()
+            if not produto:
+                raise HTTPException(status_code=404, detail=f"Produto {pid} não encontrado")
+            if produto.estoque < quantidade:
+                raise HTTPException(status_code=400, detail=f"Estoque insuficiente para {produto.nome}")
+            total += produto.preco * quantidade
+            product_updates.append((produto, quantidade))
+        else:
+            # Item personalizado: espera 'preco' e 'quantidade'
+            preco = Decimal(str(item.get('preco', '0')))
+            quantidade = int(item.get('quantidade', 0))
+            total += preco * quantidade
     
     # Aplica desconto se cupom válido
     if pedido.cupom == "ALUNO10":
         total = total * Decimal('0.90')  # 10% de desconto
     
-    # Atualiza estoque
-    for item in pedido.items:
-        produto = db.query(Produto).filter(Produto.id == item.produto_id).first()
-        produto.estoque -= item.quantidade
+    # Atualiza estoque apenas para produtos conhecidos
+    for produto, quantidade in product_updates:
+        produto.estoque -= quantidade
     
     try:
         db.commit()
