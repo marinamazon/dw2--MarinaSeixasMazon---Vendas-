@@ -36,6 +36,42 @@ applyCouponButton.addEventListener('click', applyCoupon);
 if (checkoutButton) checkoutButton.addEventListener('click', handleCheckout);
 productForm.addEventListener('submit', handleProductSubmit);
 
+// Event delegation: product add buttons
+productsGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.add-to-cart');
+    if (!btn) return;
+    const id = btn.getAttribute('data-product-id');
+    if (id) addToCart(id);
+});
+
+// Event delegation: cart item controls
+cartItems.addEventListener('click', (e) => {
+    const decrease = e.target.closest('.cart-qty-decrease');
+    const increase = e.target.closest('.cart-qty-increase');
+    const remove = e.target.closest('.cart-remove');
+
+    if (decrease) {
+        const id = decrease.getAttribute('data-item-id');
+        // find current quantity
+        const item = cart.items.find(it => String(it.id) === String(id));
+        if (item) updateCartItem(id, item.quantidade - 1);
+        return;
+    }
+
+    if (increase) {
+        const id = increase.getAttribute('data-item-id');
+        const item = cart.items.find(it => String(it.id) === String(id));
+        if (item) updateCartItem(id, item.quantidade + 1);
+        return;
+    }
+
+    if (remove) {
+        const id = remove.getAttribute('data-item-id');
+        if (id) removeFromCart(id);
+        return;
+    }
+});
+
 // Custom item modal elements & handlers
 const addCustomButton = document.getElementById('add-custom-button');
 const customModal = document.getElementById('custom-item-modal');
@@ -185,7 +221,7 @@ function renderProducts(filteredProducts = products) {
                 </p>
                 <button 
                     class="add-to-cart"
-                    onclick="addToCart(${product.id})"
+                    data-product-id="${product.id}"
                     ${product.estoque === 0 ? 'disabled' : ''}
                     aria-label="Adicionar ${product.nome} ao carrinho">
                     ${product.estoque === 0 ? 'Indisponível' : 'Adicionar ao Carrinho'}
@@ -199,7 +235,7 @@ function renderCart() {
     cartItems.innerHTML = cart.items.map(item => `
         <div class="cart-item" data-id="${item.id}">
             <img 
-                src="${item.imagem || 'https://via.placeholder.com/60?text=?'}" 
+                src="${item.imagem || 'images/placeholder-60.svg'}" 
                 alt="${item.nome}"
                 width="60"
                 height="60">
@@ -207,24 +243,12 @@ function renderCart() {
                 <h3 class="cart-item-name">${item.nome}</h3>
                 <p class="cart-item-price">R$ ${(item.preco * item.quantidade).toFixed(2)}</p>
                 <div class="cart-item-quantity">
-                    <button 
-                        onclick="updateCartItem('${item.id}', ${item.quantidade - 1})"
-                        aria-label="Diminuir quantidade">
-                        -
-                    </button>
+                    <button class="cart-qty-decrease" data-item-id="${item.id}" aria-label="Diminuir quantidade">-</button>
                     <span>${item.quantidade}</span>
-                    <button 
-                        onclick="updateCartItem('${item.id}', ${item.quantidade + 1})"
-                        aria-label="Aumentar quantidade">
-                        +
-                    </button>
+                    <button class="cart-qty-increase" data-item-id="${item.id}" aria-label="Aumentar quantidade">+</button>
                 </div>
             </div>
-            <button 
-                onclick="removeFromCart('${item.id}')"
-                aria-label="Remover ${item.nome} do carrinho">
-                ✕
-            </button>
+            <button class="cart-remove" data-item-id="${item.id}" aria-label="Remover ${item.nome} do carrinho">✕</button>
         </div>
     `).join('');
     
@@ -233,10 +257,11 @@ function renderCart() {
 
 // Funções do Carrinho
 function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
+    // Normaliza comparações de id (backend usa números, itens personalizados usam strings)
+    const product = products.find(p => String(p.id) === String(productId));
     if (!product || product.estoque === 0) return;
 
-    const cartItem = cart.items.find(item => item.id === productId);
+    const cartItem = cart.items.find(item => String(item.id) === String(productId));
     
     if (cartItem) {
         if (cartItem.quantidade < product.estoque) {
@@ -253,25 +278,20 @@ function addToCart(productId) {
 }
 
 function updateCartItem(productId, newQuantity) {
-    // Se productId for numérico (produto do backend), buscamos na lista de produtos
-    const isNumericId = Number.isInteger(productId) || (!isNaN(Number(productId)) && String(productId).trim() !== '');
-    let product = null;
-    if (isNumericId) {
-        product = products.find(p => p.id === Number(productId));
-        if (!product) return;
-    }
-
+    // Normaliza comparações de id (podem ser strings para itens personalizados)
     if (newQuantity <= 0) {
         removeFromCart(productId);
         return;
     }
 
+    // Se for um produto do backend, tenta validar estoque buscando pelo id
+    const product = products.find(p => String(p.id) === String(productId));
     if (product && newQuantity > product.estoque) {
         showToast('Quantidade indisponível');
         return;
     }
 
-    const cartItem = cart.items.find(item => item.id === productId || item.id === Number(productId));
+    const cartItem = cart.items.find(item => String(item.id) === String(productId));
     if (cartItem) {
         cartItem.quantidade = newQuantity;
         saveCart();
@@ -280,7 +300,8 @@ function updateCartItem(productId, newQuantity) {
 }
 
 function removeFromCart(productId) {
-    cart.items = cart.items.filter(item => item.id !== productId);
+    // Comparação por string garante que '123' e 123 sejam considerados iguais
+    cart.items = cart.items.filter(item => String(item.id) !== String(productId));
     saveCart();
     updateCartUI();
     showToast('Produto removido do carrinho');
