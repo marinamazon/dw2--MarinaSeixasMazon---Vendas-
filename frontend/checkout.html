@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação do Pedido</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Confirmação do Pedido</h1>
+        <section id="order-summary" aria-live="polite">
+            <!-- Resumo do pedido será inserido aqui -->
+        </section>
+        <div class="actions">
+            <button id="back-to-shop">Voltar para a Loja</button>
+        </div>
+    </main>
+
+    <script>
+    function formatMoney(v) {
+        return `R$ ${v.toFixed(2)}`;
+    }
+
+    function renderOrder(order) {
+        if (!order) {
+            document.getElementById('order-summary').innerHTML = '<p>Nenhum pedido encontrado.</p>';
+            return;
+        }
+
+        const itemsHtml = order.items.map(i => `
+            <li>
+                <strong>${i.nome}</strong> — ${i.quantidade} x ${formatMoney(i.preco)} = <em>${formatMoney(i.preco * i.quantidade)}</em>
+            </li>
+        `).join('');
+
+        const discountNote = order.coupon ? `<p>Cupom aplicado: <strong>${order.coupon}</strong></p>` : '';
+
+        document.getElementById('order-summary').innerHTML = `
+            <h2>Itens</h2>
+            <ul>${itemsHtml}</ul>
+            ${discountNote}
+            <p>Subtotal: <strong>${formatMoney(order.subtotal)}</strong></p>
+            <p>Total: <strong>${formatMoney(order.total)}</strong></p>
+            <p id="order-message">${order.message || ''}</p>
+        `;
+    }
+
+    document.getElementById('back-to-shop').addEventListener('click', () => {
+        window.location.href = 'index.html';
+    });
+
+    // Lê o pedido salvo em sessionStorage
+    const last = sessionStorage.getItem('lastOrder');
+    const order = last ? JSON.parse(last) : null;
+    renderOrder(order);
+
+    // Limpa sessionStorage.lastOrder após mostrar (opcional)
+    // sessionStorage.removeItem('lastOrder');
+    </script>
+</body>
+</html>

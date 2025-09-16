@@ -33,7 +33,7 @@ productSearch.addEventListener('input', debounce(filterProducts, 300));
 sortSelect.addEventListener('change', handleSort);
 if (categorySelect) categorySelect.addEventListener('change', handleCategoryFilter);
 applyCouponButton.addEventListener('click', applyCoupon);
-checkoutButton.addEventListener('click', handleCheckout);
+if (checkoutButton) checkoutButton.addEventListener('click', handleCheckout);
 productForm.addEventListener('submit', handleProductSubmit);
 
 // Custom item modal elements & handlers
@@ -208,20 +208,20 @@ function renderCart() {
                 <p class="cart-item-price">R$ ${(item.preco * item.quantidade).toFixed(2)}</p>
                 <div class="cart-item-quantity">
                     <button 
-                        onclick="updateCartItem(${item.id}, ${item.quantidade - 1})"
+                        onclick="updateCartItem('${item.id}', ${item.quantidade - 1})"
                         aria-label="Diminuir quantidade">
                         -
                     </button>
                     <span>${item.quantidade}</span>
                     <button 
-                        onclick="updateCartItem(${item.id}, ${item.quantidade + 1})"
+                        onclick="updateCartItem('${item.id}', ${item.quantidade + 1})"
                         aria-label="Aumentar quantidade">
                         +
                     </button>
                 </div>
             </div>
             <button 
-                onclick="removeFromCart(${item.id})"
+                onclick="removeFromCart('${item.id}')"
                 aria-label="Remover ${item.nome} do carrinho">
                 ✕
             </button>
@@ -253,20 +253,25 @@ function addToCart(productId) {
 }
 
 function updateCartItem(productId, newQuantity) {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
+    // Se productId for numérico (produto do backend), buscamos na lista de produtos
+    const isNumericId = Number.isInteger(productId) || (!isNaN(Number(productId)) && String(productId).trim() !== '');
+    let product = null;
+    if (isNumericId) {
+        product = products.find(p => p.id === Number(productId));
+        if (!product) return;
+    }
 
     if (newQuantity <= 0) {
         removeFromCart(productId);
         return;
     }
 
-    if (newQuantity > product.estoque) {
+    if (product && newQuantity > product.estoque) {
         showToast('Quantidade indisponível');
         return;
     }
 
-    const cartItem = cart.items.find(item => item.id === productId);
+    const cartItem = cart.items.find(item => item.id === productId || item.id === Number(productId));
     if (cartItem) {
         cartItem.quantidade = newQuantity;
         saveCart();
@@ -371,32 +376,47 @@ async function handleCheckout() {
         showToast('Carrinho vazio');
         return;
     }
+    // Monta resumo do pedido
+    const subtotal = cart.items.reduce((s, i) => s + i.preco * i.quantidade, 0);
+    const total = cart.discountApplied ? subtotal * (1 - DISCOUNT_PERCENT) : subtotal;
+    const orderSummary = {
+        items: cart.items,
+        subtotal,
+        total,
+        coupon: cart.discountApplied ? DISCOUNT_CODE : null,
+        message: 'Pedido gerado localmente.'
+    };
 
+    // Tenta enviar ao backend, mas mesmo que falhe, salvamos o resumo e redirecionamos
     try {
         const response = await fetch(`${API_URL}/carrinho/confirmar`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                items: cart.items,
-                coupon: cart.discountApplied ? DISCOUNT_CODE : null
-            })
+            body: JSON.stringify({ items: cart.items, coupon: orderSummary.coupon })
         });
-
-        if (!response.ok) throw new Error('Erro ao processar pedido');
-
-        cart = { items: [], discountApplied: false };
-        saveCart();
-        updateCartUI();
-        closeCart();
-        showToast('Pedido realizado com sucesso!');
-        
-        // Atualiza os produtos após o checkout
-        await fetchProducts();
-        renderProducts();
-    } catch (error) {
-        showToast('Erro ao processar pedido');
-        console.error('Checkout error:', error);
+        if (response.ok) {
+            const data = await response.json();
+            orderSummary.message = data.message || 'Pedido confirmado com sucesso';
+            orderSummary.total = data.total || orderSummary.total;
+        } else {
+            orderSummary.message = 'Pedido processado localmente (backend retornou erro).';
+        }
+    } catch (err) {
+        console.warn('Backend indisponível, usando fallback local.', err);
+        orderSummary.message = 'Backend indisponível — pedido registrado localmente.';
     }
+
+    // Salva resumo em sessionStorage para a página de confirmação
+    sessionStorage.setItem('lastOrder', JSON.stringify(orderSummary));
+
+    // Limpamos o carrinho local e atualizamos UI
+    cart = { items: [], discountApplied: false };
+    saveCart();
+    updateCartUI();
+    closeCart();
+
+    // Redireciona para a página de confirmação
+    window.location.href = 'checkout.html';
 }
 
 function applyCoupon() {
